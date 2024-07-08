@@ -1,12 +1,12 @@
 const express = require('express')
+const routes = require('./routes')
 
 const PORT = 3333
 
 const app = express()
 
-app.get('/', (req, res) => {
-  res.send('Hello World!!!')
-})
+app.use(express.json())
+app.use(routes)
 
 app.listen(PORT, () => {
   console.log(`Server listen on port ${PORT}`)
