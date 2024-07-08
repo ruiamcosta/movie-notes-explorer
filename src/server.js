@@ -3,8 +3,11 @@ require('express-async-errors')
 const express = require('express')
 const routes = require('./routes')
 const AppError = require('./utils/AppError')
+const migrationRuns = require('./database/sqlite/migrations')
 
 const PORT = 3333
+
+migrationRuns()
 
 const app = express()
 
