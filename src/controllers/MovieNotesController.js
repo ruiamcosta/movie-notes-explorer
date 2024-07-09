@@ -44,6 +44,48 @@ class MovieNotesController {
 
     return res.json()
   }
+
+  async index(req, res) {
+    const { user_id, title, tags } = req.query
+
+    let titleString = title
+    titleString = titleString ?? ''
+
+    let movie_notes
+
+    if(tags) {
+      const filterTags = tags.split(',').map(tag => tag)
+
+      movie_notes = await knex('movie_tags')
+        .select([
+          'movie_notes.id',
+          'movie_notes.title',
+          'movie_notes.user_id'
+        ])
+        .where('movie_notes.user_id', user_id)
+        .whereLike('movie_notes.title', `%${titleString}%`)
+        .whereIn('name', filterTags)
+        .innerJoin('movie_notes', 'movie_notes.id', 'movie_tags.note_id')
+        .orderBy('movie_notes.title')
+    } else {
+      movie_notes = await knex('movie_notes')
+        .where({ user_id })
+        .whereLike('title', `%${titleString}%`)
+        .orderBy('title')
+    }
+
+    const userTags = await knex('movie_tags').where({ user_id })
+    const notesWithTags = movie_notes.map(note => {
+      const noteTags = userTags.filter(tag => tag.note_id === note.id)
+
+      return {
+        ...note,
+        tags: noteTags
+      }
+    })
+
+    return res.json(notesWithTags)
+  }
 }
 
 module.exports = MovieNotesController
